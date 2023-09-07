@@ -1,0 +1,38 @@
+{
+  "name": "all-url-file-size",
+  "version": "1.0.0",
+  "description": "you will \"URL File Size\" is a Node.js module that effortlessly retrieves the size of a file from a given URL in bytes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shuvra-matrix/all-url-file-size"
+  },
+  "keywords": [
+    "file size",
+    "url size",
+    "url",
+    "file",
+    "files",
+    "size",
+    "sizes",
+    "video size",
+    "link size",
+    "video link size",
+    "remote file size",
+    "remote",
+    "video url size",
+    "video file size"
+  ],
+  "author": "shuvra-matrix",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shuvra-matrix/all-url-file-size/issues"
+  },
+  "homepage": "https://github.com/shuvra-matrix/all-url-file-size",
+  "dependencies": {
+    "axios": "^1.5.0"
+  }
+}
