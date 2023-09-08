@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-function fileSizeUrl(url) {
+function fileSizeUrl(url, format = "bytes") {
   if (typeof url !== "string" || url.length === 0)
     throw new Error("this is not a valid url");
   return new Promise(async (res, rej) => {
@@ -12,7 +12,17 @@ function fileSizeUrl(url) {
       });
 
       response.data.on("end", () => {
-        res(fileSizeInBytes);
+        let fileSize;
+        let formatType = format.toLowerCase();
+        if (formatType === "mb") {
+          fileSize = fileSizeInBytes / 1048576;
+        }
+        if (formatType === "kb") {
+          fileSize = fileSizeInBytes / 1024;
+        } else {
+          fileSize = fileSizeInBytes;
+        }
+        res(fileSize);
       });
 
       response.data.on("error", (error) => {
