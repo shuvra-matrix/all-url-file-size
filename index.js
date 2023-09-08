@@ -16,8 +16,7 @@ function fileSizeUrl(url, format = "bytes") {
         let formatType = format.toLowerCase();
         if (formatType === "mb") {
           fileSize = fileSizeInBytes / 1048576;
-        }
-        if (formatType === "kb") {
+        } else if (formatType === "kb") {
           fileSize = fileSizeInBytes / 1024;
         } else {
           fileSize = fileSizeInBytes;
