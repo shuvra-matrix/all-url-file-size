@@ -35,9 +35,9 @@ async function getFileSize(
         });
       }
 
-      if (format === "kb") {
+      if (format.toLowerCase() === "kb") {
         fileSizeInBytes /= 1024;
-      } else if (format === "mb") {
+      } else if (format.toLowerCase() === "mb") {
         fileSizeInBytes /= 1048576;
       }
 
