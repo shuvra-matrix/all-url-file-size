@@ -1,6 +1,6 @@
 {
   "name": "all-url-file-size",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "you will \"URL File Size\" is a Node.js module that effortlessly retrieves the size of a file from a given URL in bytes",
   "main": "index.js",
   "scripts": {
@@ -33,6 +33,6 @@
   },
   "homepage": "https://github.com/shuvra-matrix/all-url-file-size",
   "dependencies": {
-    "axios": "^1.5.0"
+    "axios": "^1.6.7"
   }
 }

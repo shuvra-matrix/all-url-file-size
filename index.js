@@ -1,38 +1,56 @@
 const axios = require("axios");
 
-function fileSizeUrl(url, format = "bytes") {
-  if (typeof url !== "string" || url.length === 0)
-    throw new Error("this is not a valid url");
-  return new Promise(async (res, rej) => {
+async function getFileSize(
+  url,
+  format = "bytes",
+  timeout = 20000,
+  maxAttempts = 4
+) {
+  const urlRegex = /^(https?:\/\/)/;
+
+  if (typeof url !== "string" || url.length === 0 || !urlRegex.test(url)) {
+    throw new Error("Invalid URL");
+  }
+
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
     try {
+      const response = await axios.get(url, {
+        responseType: "stream",
+        timeout,
+      });
       let fileSizeInBytes = 0;
-      const response = await axios.get(url, { responseType: "stream" });
-      response.data.on("data", (dataChunk) => {
-        fileSizeInBytes += dataChunk.length;
-      });
 
-      response.data.on("end", () => {
-        let fileSize;
-        let formatType = format.toLowerCase();
-        if (formatType === "mb") {
-          fileSize = fileSizeInBytes / 1048576;
-        } else if (formatType === "kb") {
-          fileSize = fileSizeInBytes / 1024;
-        } else {
-          fileSize = fileSizeInBytes;
-        }
-        res(fileSize);
-      });
+      const contentLength = response.headers["content-length"];
+      if (contentLength) {
+        fileSizeInBytes = parseInt(contentLength, 10);
+      } else {
+        response.data.on("data", (dataChunk) => {
+          fileSizeInBytes += dataChunk.length;
+        });
 
-      response.data.on("error", (error) => {
-        const err = new Error("could not get the file size");
-        rej(err);
-      });
+        await new Promise((resolve) => {
+          response.data.on("end", resolve);
+        });
+      }
+
+      if (format === "kb") {
+        fileSizeInBytes /= 1024;
+      } else if (format === "mb") {
+        fileSizeInBytes /= 1048576;
+      }
+
+      return fileSizeInBytes;
     } catch (error) {
-      const err = new Error("Invalid URL");
-      rej(err);
+      attempts++;
+      if (attempts >= maxAttempts) {
+        throw new Error(
+          "Sorry We could not get the file size after multiple attempts"
+        );
+      }
     }
-  });
+  }
 }
 
-module.exports = fileSizeUrl;
+module.exports = getFileSize;

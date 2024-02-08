@@ -7,50 +7,67 @@
 You can install this module using npm or yarn:
 
 ```bash
-    npm install all-url-file-size
+npm install all-url-file-size
 ```
 
 ### Usage
 
 To use all-url-file-size, require it in your Node.js application:
 
-```bash
-    const aufs = require('all-url-file-size');
+```javascript
+const aufs = require("all-url-file-size");
 ```
 
 ### Getting the File Size
 
 You can use the aufs function to retrieve the file size from a URL:
 
-```bash
-    const url = 'https://example.com/sample-file.zip';
+```javascript
+const url = "https://example.com/sample-file.zip";
 
-    aufs(url)
-    .then(size => {
-        console.log(`File size at ${url}: ${size} bytes`);
-    })
-    .catch(error => {
-        console.error(`Error: ${error.message}`);
-    });
+aufs(url)
+  .then((size) => {
+    console.log(`File size at ${url}: ${size} bytes`);
+  })
+  .catch((error) => {
+    console.error(`Error: ${error.message}`);
+  });
 ```
 
 ### Specifying the Format
 
 You can specify the format for the file size by providing the format parameter as either 'bytes', 'kb', or 'mb' . default value is bytes.
 
-```bash
+```javascript
+const url = "https://example.com/sample-file.zip";
+const format = "mb";
 
-    const url = 'https://example.com/sample-file.zip';
-    const format = "mb";
+aufs(url, format)
+  .then((size) => {
+    console.log(`File size at ${url}: ${size} MB`);
+  })
+  .catch((error) => {
+    console.error(`Error: ${error.message}`);
+  });
+```
 
-    aufs(url , format)
-    .then(size => {
-        console.log(`File size at ${url}: ${size} MB`);
-    })
-    .catch(error => {
-        console.error(`Error: ${error.message}`);
-    });
+### Timeout and Max Attempt
 
+You can also set a timeout and maximum attempts for the file size retrieval. The default timeout is 20 seconds, and the default max attempt is 4.
+
+```javascript
+const url = "https://example.com/sample-file.zip";
+const format = "mb";
+const timeout = 30000; // 30 seconds
+const maxAttempt = 5;
+
+aufs(url, format, timeout, maxAttempt)
+  .then((size) => {
+    console.log(`File size at ${url}: ${size} MB`);
+  })
+  .catch((error) => {
+    console.error(`Error: ${error.message}`);
+  });
 ```
 
 ### License
