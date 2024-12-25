@@ -1,6 +1,8 @@
 const axios = require("axios");
+const stream = require("stream");
+const util = require("util");
+const pipeline = util.promisify(stream.pipeline);
 
-// Size conversion constants
 const SIZE_UNITS = {
   BYTES: 1,
   B: 1,
@@ -28,7 +30,6 @@ async function getFileSize(
   timeout = 20000,
   maxAttempts = 4
 ) {
-  // Validate format
   const normalizedFormat = format.toUpperCase();
   if (!SIZE_UNITS[normalizedFormat]) {
     throw new FileSizeError(
@@ -39,7 +40,6 @@ async function getFileSize(
     );
   }
 
-  // Input validation
   if (typeof timeout !== "number" || timeout < 0) {
     throw new FileSizeError(
       "Timeout must be a positive number",
@@ -61,9 +61,7 @@ async function getFileSize(
 
   let attempts = 0;
 
-  // Retry with exponential backoff
   const getRetryDelay = (attempt) => {
-    // Calculate delay: 1s, 2s, 4s, 8s... but cap at 10s
     return Math.min(1000 * Math.pow(2, attempt), 10000);
   };
 
@@ -71,57 +69,40 @@ async function getFileSize(
     while (attempts < maxAttempts) {
       try {
         if (attempts > 0) {
-          // Log retry attempt with wait time
           const delay = getRetryDelay(attempts - 1);
           console.log(
             `Retrying in ${delay / 1000} seconds... (Attempt ${
               attempts + 1
             }/${maxAttempts})`
           );
-          // Wait before retry - this helps when server is temporarily unavailable
           await new Promise((resolve) => setTimeout(resolve, delay));
         }
 
-        console.log(
-          `Attempt ${attempts + 1} to fetch the file size from ${url}`
-        );
-        // Use HEAD request instead of GET
         const response = await axios.head(url, {
           timeout,
           signal: controller.signal,
           validateStatus: (status) => status === 200,
         });
 
-        const fileSizeInBytes = parseInt(
-          response.headers["content-length"],
-          10
-        );
+        let fileSizeInBytes = parseInt(response.headers["content-length"], 10);
 
         if (!fileSizeInBytes) {
-          throw new FileSizeError(
-            "Content-Length header missing",
-            "NO_CONTENT_LENGTH"
+          const response = await axios.get(url, {
+            responseType: "stream",
+            timeout,
+            signal: controller.signal,
+          });
+
+          fileSizeInBytes = 0;
+          await pipeline(
+            response.data,
+            new stream.Writable({
+              write(chunk, encoding, callback) {
+                fileSizeInBytes += chunk.length;
+                callback();
+              },
+            })
           );
-        }
-
-        // Convert size based on format
-        if (normalizedFormat === "HUMAN") {
-          const sizes = [
-            { unit: "TB", value: SIZE_UNITS.TB },
-            { unit: "GB", value: SIZE_UNITS.GB },
-            { unit: "MB", value: SIZE_UNITS.MB },
-            { unit: "KB", value: SIZE_UNITS.KB },
-            { unit: "B", value: SIZE_UNITS.B },
-          ];
-
-          for (const size of sizes) {
-            if (fileSizeInBytes >= size.value) {
-              return `${(fileSizeInBytes / size.value).toFixed(2)} ${
-                size.unit
-              }`;
-            }
-          }
-          return `${fileSizeInBytes} B`;
         }
 
         return fileSizeInBytes / SIZE_UNITS[normalizedFormat];
@@ -140,7 +121,6 @@ async function getFileSize(
             `Failed to get file size after ${maxAttempts} attempts. Last error: ${error.message}`
           );
         }
-        // Continue to next attempt
         continue;
       }
     }
