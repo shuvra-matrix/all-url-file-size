@@ -36,7 +36,7 @@ aufs(url)
 
 ### Specifying the Format
 
-You can specify the format for the file size by providing the format parameter as either 'bytes', 'kb', or 'mb' . default value is bytes.
+You can specify the format for the file size by providing the format parameter as either 'bytes', 'kb', 'mb', 'gb', 'tb' . default value is bytes.
 
 ```javascript
 const url = "https://example.com/sample-file.zip";
